@@ -23,8 +23,12 @@ public class GameManager : MonoBehaviour
     {
         gameState = GameState.IsPlay;
 
-        //mixingcameraを探索
-        mixingCamera = GameObject.FindGameObjectWithTag("mixingCamera");
+        //mixingカメラを探索
+        mixingCamera = GameObject.FindGameObjectWithTag("MixngCamera");
+        //mixingカメラを非表示
+        mixingCamera.SetActive(false);
+        //mainカメラのCinemachineBrainを無効化
+        Camera.main.GetComponent<CinemachineBrain>().enabled = false;
     }
 
     // Update is called once per frame
