@@ -6,9 +6,16 @@ public class CameraController : MonoBehaviour
     public GameObject player;　//カメラの対象（Player）
     public float followSpeed =5.0f;　//追従スピード
 
+    [Header("カメラの初期位置")]
+    public  Vector3 startPos = new Vector3(0,4.5f, 7.5f);
+    public Quaternion startRot = Quaternion.Euler(15.5f,0,0);
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        //カメラの初期位置の設定
+        transform.position = startPos;
+        transform.rotation = startRot;
 
        player = GameObject.FindWithTag("Player");
        //diff=target.transform.position - transform.position; //最初に維持するべき距離を定義

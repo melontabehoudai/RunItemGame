@@ -3,40 +3,43 @@ using UnityEngine.InputSystem;
 
 public class PlayerFreeMove : MonoBehaviour
 {
-    CharacterController controller;
-    [SerializeField] private GameObject animatorBody; // Animatorコンポーネントを持っているオブジェクトの取得
-    Animator animator;
+    CharacterController controller; //CharacterControllerを参照できる変数
+    [SerializeField] private GameObject animatorBody; //Animatorコンポーネントをもっているオブジェクトの取得
+    Animator animator; //Animatorを参照できる変数
 
-    Vector3 moveDirection = Vector3.zero; // Moveメソッドに与える方向
-    public float gravity; // 重力値
-    public float speedZ; // 前に進む力
-    public float speedJump; // ジャンプ力
+    //Vector3 moveDirection = new Vector3(0, 0, 0);
+    Vector3 moveDirection = Vector3.zero; //Moveメソッドに与える方向
 
-    private InputAction moveAction; // Moveアクションを参照するための変数
-    private InputAction jumpAction;
+    public float gravity; //重力値
+    public float speedZ; //前に進む力
+    public float speedJump; //ジャンプ力
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private InputAction moveAction; //"Move"アクションを参照するための変数
+    private InputAction jumpAction; //"Jump"アクションを参照するための変数
+
     void Start()
     {
-        // 必要なコンポーネントを自動取得
+        //Playerについているコンポーネントの取得
         controller = GetComponent<CharacterController>();
         animator = animatorBody.GetComponent<Animator>();
 
-        // PlayerInputコンポーネントに設定されている現Mapは何かを取得（Playerマップ）
+        //PlayerInputコンポーネントに設定されている現Mapは何かを取得＝（Playerマップ）
         InputActionMap actionMap = GetComponent<PlayerInput>().currentActionMap;
-        moveAction = actionMap.FindAction("Move"); // 現マップ上にいる”Move”というアクションを取得
-        jumpAction = actionMap.FindAction("Jump"); // 現マップ上にいる”Jump”というアクションを取得
+        moveAction = actionMap.FindAction("Move"); //現マップ上にいる”Move”というアクションを取得
+        jumpAction = actionMap.FindAction("Jump"); //現マップ上にいる”Jump”というアクションを取得
     }
 
-    // Update is called once per frame
     void Update()
     {
-        // CharacterControllerコンポーネントが接地判断を持っている
+        //CharacterControllerコンポーネントが接地判断をもっている
+        //入力検知は地面にいる時
         if (controller.isGrounded)
         {
-            // 上下キーによる前か後ろかの値の設定
+            //上下キーによる前か後ろかの値の設定
+            //if (Input.GetAxis("Vertical") != 0.0f)
             if (moveAction.ReadValue<Vector2>().y != 0.0f)
             {
+                //moveDirection.z = Input.GetAxis("Vertical") * speedZ;
                 moveDirection.z = moveAction.ReadValue<Vector2>().y * speedZ;
             }
             else
@@ -44,29 +47,32 @@ public class PlayerFreeMove : MonoBehaviour
                 moveDirection.z = 0;
             }
 
-            // 横回転 Rotateメソッドで直接回転させる
-            transform.Rotate(0, moveAction.ReadValue<Vector2>().x * 3, 0);
+            //横回転 Rotateメソッドで直接回転させる
+            //transform.Rotate(0, Input.GetAxis("Horizontal") * 300 * Time.deltaTime, 0);
+            transform.Rotate(0, moveAction.ReadValue<Vector2>().x * 300 * Time.deltaTime, 0);
 
+            //ジャンプボタン　押されている間
+            //if (Input.GetButton("Jump"))
             if (jumpAction.IsPressed())
             {
-                moveDirection.y = speedJump; // y方向をセッティング
-                // animator.SetTrigger("jump");
+                moveDirection.y = speedJump; //y方向をセッティング
+                //animator.SetTrigger("jump"); //ジャンプアニメへの切替
             }
         }
 
-        // 重力分の力を毎フレーム追加
-        moveDirection.y -= gravity * Time.deltaTime;
+        //常に重力はかかっている
+        moveDirection.y -= gravity;
 
-        // 移動実行 セッティングしたmoveDirectionの値を使ってMoveメソッドの発動
-        // 実際にPlayerが動く
-        // 回転を含む全身だと、グローバルな座標指定からズレるので、グローバルな座標に変換してからMoveに与える
+        //セッティングしたmoveDirectionの値を使ってMoveメソッドの発動
+        //※実際にPlayerが動く Time.deltaTimeでPC性能差によらないように動作安定
+        //回転を含む前進だと、グローバルな座標指定からズレるので、グローバルな座標になるように変換してからMoveに与える
         Vector3 globalDirection = transform.TransformDirection(moveDirection);
         controller.Move(globalDirection * Time.deltaTime);
 
-        // 移動後接地していたらY方向の速度はリセットする
+        //地面にいるのであればY成分の力を毎回0にリセット
         if (controller.isGrounded) moveDirection.y = 0;
 
-        // 速度が0以上なら走っているフラグをtrueにする
-        // animator.SetBool("run", moveDirection.z != 0.0f);
+        //アニメの制御
+        //animator.SetBool("run", moveDirection.z != 0.0f);
     }
 }
